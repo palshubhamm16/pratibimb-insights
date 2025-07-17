@@ -3,10 +3,13 @@ import {
     ComposableMap,
     Geographies,
     Geography,
+    Marker,
 } from "react-simple-maps";
 import { feature } from "topojson-client";
+import * as d3 from "d3-geo";
+import * as d3Scale from "d3-scale";
 
-// Loader map for all states
+// --- GeoJSON dynamic import map ---
 const geojsonMap = {
     andamannicobar: () => import("../data/state/andamannicobar.json"),
     andhrapradesh: () => import("../data/state/andhrapradesh.json"),
@@ -46,7 +49,6 @@ const geojsonMap = {
     westbengal: () => import("../data/state/westbengal.json"),
 };
 
-// Custom scale & center per state (can be tuned further)
 export const stateProjectionMap = {
     andamannicobar: { center: [92.62, 10.45], scale: 2000 },
     andhrapradesh: { center: [80.64, 15.91], scale: 3800 },
@@ -68,7 +70,7 @@ export const stateProjectionMap = {
     ladakh: { center: [77.1, 34.3], scale: 2800 },
     lakshadweep: { center: [72.0, 10.5], scale: 4000 },
     madhyapradesh: { center: [78.4, 23.4], scale: 1500 },
-    maharashtra: { center: [75.7, 19.5], scale: 1600 },
+    maharashtra: { center: [76.4, 19.5], scale: 3600 },
     manipur: { center: [93.9, 24.7], scale: 3000 },
     meghalaya: { center: [91.6, 25.5], scale: 3000 },
     mizoram: { center: [92.9, 23.3], scale: 3000 },
@@ -83,14 +85,14 @@ export const stateProjectionMap = {
     tripura: { center: [91.5, 23.9], scale: 3000 },
     uttarakhand: { center: [79.0, 30.1], scale: 2500 },
     uttarpradesh: { center: [80.9, 26.8], scale: 2500 },
-    westbengal: { center: [87.8, 23.5], scale: 4200 },
+    westbengal: { center: [87.8, 24.3], scale: 4200 },
     default: { center: [78.9, 22.0], scale: 1500 },
 };
 
-
-export default function StateMap({ stateName }) {
+export default function StateMap({ stateName, districtData = {} }) {
     const [geoData, setGeoData] = useState(null);
     const [hoveredDistrict, setHoveredDistrict] = useState(null);
+    const [showCircles, setShowCircles] = useState(true);
 
     useEffect(() => {
         const key = stateName.toLowerCase().replace(/\s/g, "");
@@ -124,11 +126,23 @@ export default function StateMap({ stateName }) {
         );
     }
 
+    const fraudCounts = Object.values(districtData).filter((n) => typeof n === "number");
+    const maxFraud = fraudCounts.length ? Math.max(...fraudCounts) : 1;
+    const colorScale = d3Scale.scaleLinear().domain([0, maxFraud]).range(["#fee5d9", "#a50f15"]);
+
     return (
-        <div className="bg-white rounded-xl shadow p-4">
-            <h2 className="text-lg font-semibold mb-4 text-center">
-                District-wise Heatmap – {stateName}
-            </h2>
+        <div className="bg-white rounded-xl shadow p-4 relative">
+            <div className="flex justify-between items-center mb-4">
+                <h2 className="text-lg font-semibold text-center w-full">
+                    District-wise Heatmap – {stateName}
+                </h2>
+                <button
+                    onClick={() => setShowCircles((prev) => !prev)}
+                    className="absolute top-4 right-4 bg-blue-600 text-white px-3 py-1 rounded text-sm shadow"
+                >
+                    {showCircles ? "Show Fill Map" : "Show Circle Map"}
+                </button>
+            </div>
 
             <div style={{ width: "100%", height: "600px", overflow: "hidden" }}>
                 <ComposableMap
@@ -143,6 +157,8 @@ export default function StateMap({ stateName }) {
                                     geo.properties.district ||
                                     geo.properties.DISTRICT ||
                                     geo.properties.name;
+                                const count = districtData[district?.toUpperCase?.()] || 0;
+                                const fillColor = showCircles ? "rgba(156, 163, 175, 0.45)" : colorScale(count);
 
                                 return (
                                     <Geography
@@ -152,7 +168,7 @@ export default function StateMap({ stateName }) {
                                         onMouseLeave={() => setHoveredDistrict(null)}
                                         style={{
                                             default: {
-                                                fill: "#93c5fd",
+                                                fill: fillColor,
                                                 stroke: "#ffffff",
                                                 strokeWidth: 1,
                                                 outline: "none",
@@ -170,15 +186,53 @@ export default function StateMap({ stateName }) {
                             })
                         }
                     </Geographies>
+
+                    {showCircles &&
+                        geoData.features.map((feature, index) => {
+                            const district =
+                                feature.properties.district ||
+                                feature.properties.DISTRICT ||
+                                feature.properties.name;
+
+                            const key = district?.toUpperCase?.();
+                            const count = districtData[key] || 0;
+                            if (count === 0) return null;
+
+                            const centroid = d3.geoCentroid(feature);
+                            const radius = Math.sqrt(count / maxFraud) * 20;
+
+                            return (
+                                <Marker key={index} coordinates={centroid}>
+                                    <circle
+                                        r={radius}
+                                        fill="rgba(220, 38, 38, 0.6)"
+                                        stroke="#7f1d1d"
+                                        strokeWidth={0.5}
+                                    />
+                                </Marker>
+                            );
+                        })}
                 </ComposableMap>
             </div>
+
+            {!showCircles && (
+                <div className="mt-4 px-4">
+                    <div className="flex items-center justify-between text-xs text-gray-500">
+                        <span>Low</span>
+                        <div className="flex-1 h-3 mx-2 bg-gradient-to-r from-[#fee5d9] to-[#a50f15] rounded" />
+                        <span>High</span>
+                    </div>
+                </div>
+            )}
 
             {hoveredDistrict && (
                 <div className="mt-4 text-center">
                     <p className="text-md font-medium text-gray-700">
                         District: {hoveredDistrict}
                     </p>
-                    <p className="text-sm text-gray-500">Mock Reports: N/A</p>
+                    <p className="text-sm text-gray-500">
+                        Fraud Reports: {districtData[hoveredDistrict?.toUpperCase?.()] || 0}
+                    </p>
                 </div>
             )}
         </div>

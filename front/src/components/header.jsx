@@ -30,24 +30,24 @@ export default function Header() {
 
                 {/* Navigation Links */}
                 <nav>
-                    <ul className="flex space-x-4">
+                    <ul className="flex space-x-3">
                         <li>
-                            <Link to="/" className="text-sm font-medium hover:underline">
+                            <Link to="/" className="text-lg font-medium hover:underline">
                                 Home
                             </Link>
                         </li>
                         <li>
-                            <Link to="/upload" className="text-sm font-medium hover:underline">
+                            <Link to="/upload" className="text-lg font-medium hover:underline">
                                 Upload
                             </Link>
                         </li>
                         <li>
-                            <a href="/about" className="text-sm font-medium hover:underline">
+                            <a href="/about" className="text-lg font-medium hover:underline">
                                 About
                             </a>
                         </li>
                         <li>
-                            <a href="/contact" className="text-sm font-medium hover:underline">
+                            <a href="/contact" className="text-lg font-medium hover:underline">
                                 Contact
                             </a>
                         </li>

@@ -9,7 +9,16 @@ export default function StatePage() {
             <div className="mb-6 flex items-center justify-center">
                 <h1 className="text-4xl font-extrabold tracking-tight mb-4">{stateName}</h1>
             </div>
-            <StateMap stateName={stateName} />
+            <StateMap
+                stateName="Maharashtra"
+                districtData={{
+                    "PUNE": 150,
+                    "MUMBAI": 300,
+                    "NAGPUR": 100,
+                }}
+            />
+
+
         </div>
     );
 }
