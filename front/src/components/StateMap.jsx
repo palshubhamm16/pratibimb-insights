@@ -70,7 +70,7 @@ export const stateProjectionMap = {
     ladakh: { center: [77.1, 34.3], scale: 2800 },
     lakshadweep: { center: [72.0, 10.5], scale: 4000 },
     madhyapradesh: { center: [78.4, 23.4], scale: 1500 },
-    maharashtra: { center: [76.4, 19.5], scale: 3600 },
+    maharashtra: { center: [76.4, 18.5], scale: 3900 },
     manipur: { center: [93.9, 24.7], scale: 3000 },
     meghalaya: { center: [91.6, 25.5], scale: 3000 },
     mizoram: { center: [92.9, 23.3], scale: 3000 },
@@ -140,11 +140,11 @@ export default function StateMap({ stateName, districtData = {} }) {
                     onClick={() => setShowCircles((prev) => !prev)}
                     className="absolute top-4 right-4 bg-blue-600 text-white px-3 py-1 rounded text-sm shadow"
                 >
-                    {showCircles ? "Show Fill Map" : "Show Circle Map"}
+                    {showCircles ? "Show Gradient Map" : "Show Cluster Map"}
                 </button>
             </div>
 
-            <div style={{ width: "100%", height: "600px", overflow: "hidden" }}>
+            <div style={{ width: "100%", height: "530px", overflow: "hidden" }}>
                 <ComposableMap
                     projection="geoMercator"
                     projectionConfig={projectionConfig}
@@ -216,7 +216,7 @@ export default function StateMap({ stateName, districtData = {} }) {
             </div>
 
             {!showCircles && (
-                <div className="mt-4 px-4">
+                <div className="mt-1 px-5">
                     <div className="flex items-center justify-between text-xs text-gray-500">
                         <span>Low</span>
                         <div className="flex-1 h-3 mx-2 bg-gradient-to-r from-[#fee5d9] to-[#a50f15] rounded" />

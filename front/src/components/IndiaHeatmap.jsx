@@ -31,7 +31,7 @@ const maxFraud = fraudCounts.length > 0 ? Math.max(...fraudCounts) : 1;
 const colorScale = d3.scaleSequential(d3.interpolateReds).domain([0, maxFraud]);
 
 const getRelativeColor = (count) =>
-    typeof count === "number" && count > 0 ? colorScale(count) : "#f0f0f0";
+    typeof count === "number" && count > 0 ? colorScale(count) : "rgba(156, 163, 175, 0.45)";
 
 export default function IndiaHeatmap() {
     const [hoveredState, setHoveredState] = useState(null);
@@ -40,14 +40,17 @@ export default function IndiaHeatmap() {
     return (
         <div className="bg-white p-4 rounded-2xl shadow mb-6 relative">
             <div className="mb-4 text-center">
-                <h2 className="text-xl font-semibold mb-4">
+                <h2 className="text-2xl font-semibold mb-4">
                     State-wise Fraud Heatmap
                 </h2>
+                <h3 className="text-sm text-gray-600">
+                    (Click on State to Open State Page)
+                </h3>
             </div>
 
             <ComposableMap
                 projection="geoMercator"
-                projectionConfig={{ center: [81.4, 22], scale: 900 }}
+                projectionConfig={{ center: [81.4, 23.5], scale: 1030 }}
                 style={{ width: "100%", height: "800px" }}
             >
                 <Geographies geography={indiaGeo}>
@@ -88,7 +91,7 @@ export default function IndiaHeatmap() {
                 </Geographies>
             </ComposableMap>
 
-            {/* 🧠 Legend */}
+            {/*  Legend */}
             <div className="absolute top-[340px] left-6 w-3 h-64 bg-gradient-to-t from-[#fee5d9] to-[#a50f15] rounded">
                 {/* Labels */}
                 <div className="absolute right-[-50px] top-0 text-sm text-gray-600">

@@ -15,7 +15,7 @@ const mockData = [
 
 export default function TopStatesBarGraph() {
   return (
-    <div className="bg-white rounded-2xl shadow p-6 mb-6">
+    <div className="w-full max-w-7xl bg-white rounded-2xl shadow p-6 mb-6 mx-auto">
       <h3 className="text-lg font-semibold mb-2">Top 10 Most Affected States</h3>
       <ResponsiveContainer width="100%" height={300}>
         <BarChart data={mockData}>

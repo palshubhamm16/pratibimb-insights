@@ -6,7 +6,7 @@ import TrendLineChart from "../components/TrendLineChart";
 
 export default function NationalDashboard() {
   return (
-    <div className="p-6 bg-green-200/30 min-h-screen">
+    <div className="p-6 bg-blue-200/30 min-h-screen">
       <div className="flex items-center justify-center mb-4 mx-auto">
         <h1 className="text-4xl tracking-tighter font-bold mb-6">National Fraud Analytics Dashboard</h1>
       </div>
