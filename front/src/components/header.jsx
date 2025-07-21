@@ -3,8 +3,8 @@ import meityLogo from "../assets/meity-logo.png"; // Replace with actual path
 
 export default function Header() {
     return (
-        <div className="w-full bg-white shadow border-b px-6 py-4">
-            <div className="flex justify-between mx-auto mb-3">
+        <div className="w-full bg-white shadow border-b px-6 py-3">
+            <div className="flex justify-between mx-auto mb-2">
                 <a
                     href="https://www.meity.gov.in/"
                     target="_blank"
@@ -13,7 +13,7 @@ export default function Header() {
                     <img
                         src={meityLogo}
                         alt="MeitY Logo"
-                        className="w-50 h-12 object-contain"
+                        className="w-50 h-11 object-contain"
                     />
                 </a>
             </div>

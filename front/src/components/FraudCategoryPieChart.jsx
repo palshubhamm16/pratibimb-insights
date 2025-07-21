@@ -15,7 +15,7 @@ export default function FraudCategoryPieChart({ data }) {
                         nameKey="category"
                         cx="50%"
                         cy="50%"
-                        outerRadius={150}
+                        outerRadius={130}
                         label
                     >
                         {data.map((_, index) => (

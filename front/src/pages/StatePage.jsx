@@ -4,6 +4,16 @@ import StateSummaryCards from "../components/StateSummaryCards";
 import TopDistrictsBarChart from "../components/TopDistrictsBarChart";
 import FraudCategoryPieChart from "../components/FraudCategoryPieChart";
 import TrendGraph from "../components/TrendGraph";
+import DateFilter from "../components/DateFilter";
+import DateHeatmap from "../components/DateHeatmap";
+import TopFraudDays from "../components/TopFraudDays";
+import TopSuspectNumbers from "../components/TopSuspectNumbers";
+import ScammerCheck from "../components/ScammerCheck";
+
+import dayjs from "dayjs";
+
+
+
 
 export default function StatePage() {
     const { stateName } = useParams();
@@ -12,18 +22,61 @@ export default function StatePage() {
         .map(word => word.charAt(0).toUpperCase() + word.slice(1))
         .join(" ");
 
+    const handleFilterChange = ({ startDate, endDate }) => {
+        // setFilteredData({ startDate, endDate });
+
+        // TODO: Trigger API calls or filter existing data using the new range
+        console.log("Filtering data between:", startDate, "to", endDate);
+    };
+
+    // Mock data for top suspect numbers
+    const mockTopSuspects = [
+        { number: "9876543210", count: 12 },
+        { number: "9123456789", count: 10 },
+        { number: "9988776655", count: 9 },
+        { number: "9000012345", count: 8 },
+        { number: "8443322110", count: 7 },
+        { number: "8080808080", count: 6 },
+        { number: "9111222333", count: 5 },
+        { number: "7000000000", count: 4 },
+        { number: "9999999999", count: 3 },
+        { number: "8000000001", count: 3 },
+    ];
+
+    // Mock data for top fraud days
+    const mockTopDays = [
+        { date: "2025-06-01", count: 132 },
+        { date: "2025-05-20", count: 125 },
+        { date: "2025-07-03", count: 118 },
+        { date: "2025-06-15", count: 109 },
+        { date: "2025-04-09", count: 105 },
+        { date: "2025-05-01", count: 97 },
+        { date: "2025-06-22", count: 93 },
+        { date: "2025-03-18", count: 89 },
+        { date: "2025-02-27", count: 86 },
+        { date: "2025-06-30", count: 83 },
+    ];
+
+
+
+    //mock data for heat map
+    const dummyData = Array.from({ length: 90 }).map((_, i) => ({
+        date: dayjs().subtract(i, "day").format("YYYY-MM-DD"),
+        count: Math.floor(Math.random() * 10),
+    }));
+
     // Mock data for Maharashtra
     const districtData = {
-        "PUNE": 150,
-        "MUMBAI": 300,
-        "NAGPUR": 100,
-        "AURANGABAD": 80,
-        "NASHIK": 50,
-        "SOLAPUR": 40,
-        "THANE": 90,
-        "JALGAON": 30,
-        "KOLHAPUR": 25,
-        "SANGLI": 15,
+        "PATNA": 180,
+        "GAYA": 120,
+        "MUZAFFARPUR": 95,
+        "BHAGALPUR": 85,
+        "DARBHANGA": 70,
+        "PURNIA": 60,
+        "SARAN": 55,
+        "EAST CHAMPARAN": 45,
+        "AURANGABAD": 35,
+        "BEGUSARAI": 30,
     };
 
     const summaryData = {
@@ -175,8 +228,11 @@ export default function StatePage() {
             </div>
 
             <div className="mb-10">
-                <StateMap stateName="maharashtra" districtData={districtData} />
+                <StateMap stateName="bihar" districtData={districtData} />
             </div>
+
+            {/* Date Filter */}
+            <DateFilter onFilterChange={handleFilterChange} />
 
             <div className="mb-10">
                 <StateSummaryCards
@@ -192,18 +248,25 @@ export default function StatePage() {
 
 
             {/* Half-width trend graph + pie chart */}
-            <div className="flex flex-wrap -mx-2">
-                <div className="w-full md:w-1/2 px-2 ">
-                    <TrendGraph
-                        totalData={totalTrendData}
-                        categoryData={categoryTrendData}
-                    />
-                </div>
-                <div className="w-full md:w-1/2 px-2 ">
-                    <FraudCategoryPieChart data={categoryData} />
-                </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-10">
+                <TrendGraph
+                    totalData={totalTrendData}
+                    categoryData={categoryTrendData}
+                />
+                <FraudCategoryPieChart data={categoryData} />
             </div>
 
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-10">
+                <TopFraudDays data={mockTopDays} />
+                <TopSuspectNumbers data={mockTopSuspects} />
+
+
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-10">
+                <DateHeatmap data={dummyData} />
+
+                <ScammerCheck />
+            </div>
         </div>
     );
 }

@@ -38,10 +38,10 @@ export default function TrendGraph({ totalData, categoryData }) {
                     <Tooltip />
                     <Legend
                         layout="horizontal"
-                        verticalAlign="top"
+                        verticalAlign="bottom"
                         align="center"
                         content={(props) => (
-                            <div className="mt-4 mb-3 flex flex-wrap justify-center gap-4">
+                            <div className="mt-4 mb-3 ml-5 flex flex-wrap justify-center gap-4">
                                 {props.payload.map((entry, index) => (
                                     <div key={`item-${index}`} className="flex items-center space-x-2">
                                         <div
