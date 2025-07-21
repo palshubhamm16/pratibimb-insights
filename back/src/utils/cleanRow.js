@@ -47,18 +47,31 @@ export default function cleanRow(row) {
     // Category + amount
     const matchAmount = row["Category, Fraudulent Amount"]?.match(/^(.*?)\s+of\s+Rs\.?\s*([\d,]+)/i);
 
-    // Date and time
+    // Date and time (robust)
     let fetchedDate = null;
     let fetchedTime = null;
-    const fetchedRaw = row["Location Fetched at"]?.trim();
+    const fetchedRaw = row["Location Fetched at"]?.trim().replace(/\s+/g, ' ');
+
     if (fetchedRaw) {
-        const match = fetchedRaw.match(/^(\d{2})\/(\d{2})\/(\d{4})\s+(\d{2}:\d{2})$/);
+        // Format 1: DD/MM/YYYY HH:MM
+        let match = fetchedRaw.match(/^(\d{2})\/(\d{2})\/(\d{4}) (\d{2}:\d{2})$/);
         if (match) {
             const [_, dd, mm, yyyy, time] = match;
-            fetchedDate = new Date(`${yyyy}-${mm}-${dd}`);
+            fetchedDate = new Date(`${yyyy}-${mm}-${dd}T00:00:00Z`);
             fetchedTime = time;
+        } else {
+            // Format 2: YYYY-MM-DD HH:MM:SS
+            match = fetchedRaw.match(/^(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2}):(\d{2})$/);
+            if (match) {
+                const [_, yyyy, mm, dd, hh, min, ss] = match;
+                fetchedDate = new Date(`${yyyy}-${mm}-${dd}T00:00:00Z`);
+                fetchedTime = `${hh}:${min}`;
+            } else {
+                console.warn("Unrecognized date format:", fetchedRaw);
+            }
         }
     }
+
 
     return {
         suspectNumber: row["Suspect No."]?.trim(),
