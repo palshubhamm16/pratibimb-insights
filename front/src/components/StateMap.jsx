@@ -128,7 +128,11 @@ export default function StateMap({ stateName, districtData = {} }) {
 
     const fraudCounts = Object.values(districtData).filter((n) => typeof n === "number");
     const maxFraud = fraudCounts.length ? Math.max(...fraudCounts) : 1;
-    const colorScale = d3Scale.scaleLinear().domain([0, maxFraud]).range(["#fee5d9", "#a50f15"]);
+    const minFraud = fraudCounts.length ? Math.min(...fraudCounts) : 0;
+    const colorScale = d3Scale
+        .scaleLinear()
+        .domain([minFraud, maxFraud])
+        .range(["#fee5d9", "#a50f15"]);
 
     return (
         <div className="bg-white rounded-xl shadow p-4 relative">
@@ -158,7 +162,12 @@ export default function StateMap({ stateName, districtData = {} }) {
                                     geo.properties.DISTRICT ||
                                     geo.properties.name;
                                 const count = districtData[district?.toUpperCase?.()] || 0;
-                                const fillColor = showCircles ? "rgba(156, 163, 175, 0.45)" : colorScale(count);
+                                const fillColor =
+                                    count === 0
+                                        ? "#e5e7eb" // default greyish color for districts with no data
+                                        : showCircles
+                                            ? "rgba(156, 163, 175, 0.45)"
+                                            : colorScale(count);
 
                                 return (
                                     <Geography

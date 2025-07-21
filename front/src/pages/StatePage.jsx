@@ -32,6 +32,8 @@ export default function StatePage() {
 
     const [summaryData, setSummaryData] = useState(null);
     const [topDistricts, setTopDistricts] = useState([]);
+    const [allDistricts, setAllDistricts] = useState([]);
+
     const [categoryData, setCategoryData] = useState([]);
     const [trendData, setTrendData] = useState({ dailyCases: [], categoryWiseTrend: {} });
     const [topDays, setTopDays] = useState([]);
@@ -53,7 +55,14 @@ export default function StatePage() {
             ]);
 
             setSummaryData(summary);
-            setTopDistricts(districts);
+            setAllDistricts(districts);
+            setTopDistricts(
+                Object.entries(districts)
+                    .map(([district, count]) => ({ district, count }))
+                    .sort((a, b) => b.count - a.count)
+                    .slice(0, 10)
+            );
+            // console.log("Top Districts:", topDistricts);
             setCategoryData(categories);
             setTrendData(trends);
             setTopDays(days);
@@ -61,6 +70,9 @@ export default function StatePage() {
             console.error("Error loading state data:", error);
         }
     };
+    // console.log("Top Districts:", topDistricts);
+
+
 
     useEffect(() => {
         const { startDate, endDate } = dateRange;
@@ -95,7 +107,7 @@ export default function StatePage() {
 
             {/* Choropleth Map */}
             <div className="mb-10">
-                <StateMap stateName={stateName} districtData={topDistricts} />
+                <StateMap stateName={stateName} districtData={allDistricts} />
             </div>
 
             {/* Date Filter */}
@@ -113,15 +125,15 @@ export default function StatePage() {
             )}
 
             {/* Top Districts */}
-            {/* <div className="mb-10">
+            <div className="mb-10">
                 <TopDistrictsBarChart data={topDistricts} />
-            </div> */}
+            </div>
 
             {/* Trend & Category Pie */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-10">
                 <TrendGraph
-                    totalData={trendData.dailyCases}
-                    categoryData={trendData.categoryWiseTrend}
+                    totalData={trendData.totalTrendData}
+                    categoryData={trendData.categoryTrendData}
                 />
                 <FraudCategoryPieChart data={categoryData} />
             </div>

@@ -1,8 +1,54 @@
+import { useState } from "react";
+import axios from "axios";
+
 export default function UploadPage() {
+    const [file, setFile] = useState(null);
+    const [uploading, setUploading] = useState(false);
+    const [message, setMessage] = useState("");
+
+    const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
+    const api = axios.create({
+        baseURL: BASE_URL,
+        timeout: 10000,
+    });
+
+    const handleFileChange = (e) => {
+        setFile(e.target.files[0]);
+    };
+
+    const handleUpload = async (e) => {
+        e.preventDefault();
+        if (!file) {
+            setMessage("Please select a CSV file to upload.");
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append("file", file);
+
+        try {
+            setUploading(true);
+            setMessage("");
+            const response = await api.post(`/uploads/upload`, formData, {
+                headers: {
+                    "Content-Type": "multipart/form-data",
+                },
+            });
+
+            setMessage("Upload successful ✅");
+            console.log("Server Response:", response.data);
+        } catch (error) {
+            console.error("Upload failed:", error);
+            setMessage("Upload failed ❌");
+        } finally {
+            setUploading(false);
+        }
+    };
+
     return (
-        <div className="p-6  bg-green-200/20 min-h-screen flex flex-col items-center">
+        <div className="p-6 bg-green-200/20 min-h-screen flex flex-col items-center">
             <div className="flex items-center justify-center mb-4 mx-auto">
-                <h1 className="text-3xl md:text-4xl lg:text-5xl tracking-tight font-extrabold mb-6 ">
+                <h1 className="text-3xl md:text-4xl lg:text-5xl tracking-tight font-extrabold mb-6">
                     Upload Fraud Report CSV
                 </h1>
             </div>
@@ -66,39 +112,35 @@ export default function UploadPage() {
                     </table>
                 </div>
             </div>
-
-
-
-
             {/* Upload Form */}
-            <form className="max-w-md mx-auto bg-white p-6 rounded shadow">
+            <form className="max-w-md mx-auto bg-white p-6 rounded shadow" onSubmit={handleUpload}>
                 <div className="flex flex-col items-center">
-                    {/* Centered input */}
                     <div className="w-full flex justify-center mb-4">
                         <input
                             type="file"
                             accept=".csv"
+                            onChange={handleFileChange}
                             className="text-sm text-gray-700
-                   file:mr-4 file:py-2 file:px-4
-                   file:rounded file:border-0
-                   file:bg-blue-100 file:text-blue-700
-                   hover:file:bg-blue-200"
+                            file:mr-4 file:py-2 file:px-4
+                            file:rounded file:border-0
+                            file:bg-blue-100 file:text-blue-700
+                            hover:file:bg-blue-200"
                         />
                     </div>
 
-                    {/* Upload button */}
                     <div>
                         <button
                             type="submit"
-                            className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+                            disabled={uploading}
+                            className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 disabled:opacity-50"
                         >
-                            Upload
+                            {uploading ? "Uploading..." : "Upload"}
                         </button>
                     </div>
+
+                    {message && <p className="mt-4 text-sm text-center">{message}</p>}
                 </div>
             </form>
-
-
         </div>
     );
 }
