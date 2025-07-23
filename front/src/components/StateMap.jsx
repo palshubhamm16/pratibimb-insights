@@ -11,7 +11,7 @@ import * as d3Scale from "d3-scale";
 
 // --- GeoJSON dynamic import map ---
 const geojsonMap = {
-    andamannicobar: () => import("../data/state/andamannicobar.json"),
+    andamanandnicobarislands: () => import("../data/state/andamannicobar.json"),
     andhrapradesh: () => import("../data/state/andhrapradesh.json"),
     arunachalpradesh: () => import("../data/state/arunachalpradesh.json"),
     assam: () => import("../data/state/assam.json"),
@@ -50,10 +50,10 @@ const geojsonMap = {
 };
 
 export const stateProjectionMap = {
-    andamannicobar: { center: [92.62, 10.45], scale: 2000 },
-    andhrapradesh: { center: [80.64, 15.91], scale: 3800 },
+    andamanandnicobarislands: { center: [92.62, 10.2], scale: 3800 },
+    andhrapradesh: { center: [80.64, 15.91], scale: 3900 },
     arunachalpradesh: { center: [94.72, 28.2], scale: 5000 },
-    assam: { center: [92.93, 26.2], scale: 6000 },
+    assam: { center: [92.93, 26.1], scale: 6000 },
     bihar: { center: [85.7, 25.7], scale: 6500 },
     chandigarh: { center: [76.78, 30.73], scale: 68000 },
     chhattisgarh: { center: [81.6, 21.3], scale: 4200 },
@@ -66,23 +66,23 @@ export const stateProjectionMap = {
     jammukashmir: { center: [75.3, 33.6], scale: 1800 },
     jharkhand: { center: [85.3, 23.6], scale: 2000 },
     karnataka: { center: [76.5, 14.5], scale: 1800 },
-    kerala: { center: [76.3, 10.5], scale: 3000 },
+    kerala: { center: [76.1, 10.5], scale: 6300 },
     ladakh: { center: [77.1, 34.3], scale: 2800 },
     lakshadweep: { center: [72.0, 10.5], scale: 4000 },
     madhyapradesh: { center: [78.4, 23.4], scale: 1500 },
     maharashtra: { center: [76.4, 18.5], scale: 3900 },
-    manipur: { center: [93.9, 24.7], scale: 3000 },
-    meghalaya: { center: [91.6, 25.5], scale: 3000 },
+    manipur: { center: [93.8, 24.7], scale: 12000 },
+    meghalaya: { center: [91.2, 25.5], scale: 12000 },
     mizoram: { center: [92.9, 23.3], scale: 3000 },
-    nagaland: { center: [94.2, 26.1], scale: 3000 },
-    odisha: { center: [84.6, 20.3], scale: 2000 },
+    nagaland: { center: [94.4, 26.1], scale: 12000 },
+    odisha: { center: [84.3, 20.3], scale: 5300 },
     puducherry: { center: [79.8, 11.9], scale: 5000 },
     punjab: { center: [75.3, 31.1], scale: 6000 },
-    rajasthan: { center: [73.8, 27.0], scale: 1300 },
-    sikkim: { center: [88.5, 27.5], scale: 5000 },
-    tamilnadu: { center: [78.6, 10.5], scale: 3000 },
-    telangana: { center: [79.1, 17.5], scale: 2000 },
-    tripura: { center: [91.5, 23.9], scale: 3000 },
+    rajasthan: { center: [73.8, 26.5], scale: 3800 },
+    sikkim: { center: [88.5, 27.5], scale: 10000 },
+    tamilnadu: { center: [78.6, 10.8], scale: 5400 },
+    telangana: { center: [79.0, 17.8], scale: 6500 },
+    tripura: { center: [91.67, 23.75], scale: 14500 },
     uttarakhand: { center: [79.0, 30.1], scale: 2500 },
     uttarpradesh: { center: [80.9, 26.8], scale: 2500 },
     westbengal: { center: [87.8, 24.3], scale: 4200 },
@@ -208,7 +208,12 @@ export default function StateMap({ stateName, districtData = {} }) {
                             if (count === 0) return null;
 
                             const centroid = d3.geoCentroid(feature);
-                            const radius = Math.sqrt(count / maxFraud) * 20;
+                            // Use minFraud and maxFraud for consistent scaling
+                            const radiusScale = d3Scale
+                                .scaleSqrt()
+                                .domain([minFraud, maxFraud])
+                                .range([6, 20]);
+                            const radius = radiusScale(count);
 
                             return (
                                 <Marker key={index} coordinates={centroid}>
@@ -216,7 +221,7 @@ export default function StateMap({ stateName, districtData = {} }) {
                                         r={radius}
                                         fill="rgba(220, 38, 38, 0.6)"
                                         stroke="#7f1d1d"
-                                        strokeWidth={0.5}
+                                        strokeWidth={0.9}
                                     />
                                 </Marker>
                             );
