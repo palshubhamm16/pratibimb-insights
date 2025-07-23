@@ -35,7 +35,7 @@ export default function StatePage() {
     const [allDistricts, setAllDistricts] = useState([]);
 
     const [categoryData, setCategoryData] = useState([]);
-    const [trendData, setTrendData] = useState({ dailyCases: [], categoryWiseTrend: {} });
+    const [trendData, setTrendData] = useState({});
     const [topDays, setTopDays] = useState([]);
 
     const handleFilterChange = ({ startDate, endDate }) => {
@@ -65,6 +65,7 @@ export default function StatePage() {
             // console.log("Top Districts:", topDistricts);
             setCategoryData(categories);
             setTrendData(trends);
+            console.log("Trend Data:", trends.totalTrendData);
             setTopDays(days);
         } catch (error) {
             console.error("Error loading state data:", error);
@@ -105,7 +106,7 @@ export default function StatePage() {
                 <p className="text-gray-500 text-sm mt-1">State-level Fraud Analytics</p>
             </div>
 
-            {/* Choropleth Map */}
+            {/* Map */}
             <div className="mb-10">
                 <StateMap stateName={stateName} districtData={allDistricts} />
             </div>

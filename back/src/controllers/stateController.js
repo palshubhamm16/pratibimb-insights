@@ -91,14 +91,17 @@ export async function getCategoryDistribution(req, res) {
 }
 
 import { startOfMonth, subMonths } from "date-fns";
-
 export async function getTrendData(req, res) {
     try {
         const { stateName } = req.params;
+        const { start: startQ, end: endQ } = req.query;
 
-        // Last 12 full months range
-        const endDate = startOfMonth(new Date());
-        const startDate = subMonths(endDate, 12);
+        // Default: Last 12 full months
+        const defaultEnd = startOfMonth(new Date());
+        const defaultStart = subMonths(defaultEnd, 12);
+
+        const startDate = startQ ? new Date(startQ) : defaultStart;
+        const endDate = endQ ? new Date(endQ) : defaultEnd;
 
         const match = {
             state: stateName,
@@ -151,9 +154,8 @@ export async function getTrendData(req, res) {
 
         const topCategories = topCategoriesAgg.map(c => c._id);
 
-        // Step 2: Prepare category-wise monthly structure
-        const categoryTrendMap = {}; // { '2024-08': { LoanScam: 10, ... }, ... }
-
+        // Step 2: Format category-wise monthly data
+        const categoryTrendMap = {};
         categoryMonthly.forEach(({ _id, count }) => {
             const { month, category } = _id;
             if (!topCategories.includes(category)) return;
@@ -162,16 +164,15 @@ export async function getTrendData(req, res) {
             categoryTrendMap[month][category] = count;
         });
 
-        // Step 3: Format final category trend array
-        const categoryTrendData = [];
+        // Step 3: Prepare structured array
         const allMonths = totalTrendData.map(d => d.month);
-        for (const month of allMonths) {
+        const categoryTrendData = allMonths.map(month => {
             const entry = { month };
             topCategories.forEach(cat => {
                 entry[cat] = categoryTrendMap[month]?.[cat] || 0;
             });
-            categoryTrendData.push(entry);
-        }
+            return entry;
+        });
 
         res.json({
             totalTrendData,
@@ -209,3 +210,50 @@ export async function getTopDays(req, res) {
         res.status(500).json({ error: "Failed to get top fraud days" });
     }
 }
+
+
+// controller for fetching top suspect numbers
+export const getTopSuspectNumbers = async (req, res) => {
+    try {
+        const { state } = req.params;
+        const { start, end } = req.query;
+
+        const matchStage = {
+            state,
+            suspectNumber: { $ne: null },
+        };
+
+        // Apply date filter if both start and end are provided
+        if (start && end) {
+            matchStage.fetchedDate = {
+                $gte: new Date(start),
+                $lte: new Date(end),
+            };
+        }
+
+        const pipeline = [
+            { $match: matchStage },
+            {
+                $group: {
+                    _id: "$suspectNumber",
+                    count: { $sum: 1 },
+                },
+            },
+            { $sort: { count: -1 } },
+            { $limit: 10 },
+            {
+                $project: {
+                    number: "$_id",
+                    count: 1,
+                    _id: 0,
+                },
+            },
+        ];
+
+        const topSuspects = await FraudReport.aggregate(pipeline);
+        res.json(topSuspects);
+    } catch (err) {
+        console.error("Error fetching top suspect numbers:", err);
+        res.status(500).json({ error: "Failed to fetch top suspects" });
+    }
+};

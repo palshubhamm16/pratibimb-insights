@@ -37,3 +37,9 @@ export async function fetchTopDays(state, start, end) {
     const res = await api.get(`/states/${state}/top-days${buildQuery(start, end)}`);
     return res.data;
 }
+
+export async function fetchTopSuspects(state, start, end) {
+    const res = await api.get(`/states/${state}/top-suspects${buildQuery(start, end)}`);
+    return res.data;
+
+}
