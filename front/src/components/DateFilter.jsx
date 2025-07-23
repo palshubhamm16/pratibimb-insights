@@ -66,8 +66,19 @@ export default function DateFilter({ onFilterChange }) {
                             Apply Filter
                         </button>
                     </div>
+                    <div className="flex items-center justify-center mt-5">
+                        <button
+                            type="reset"
+                            onClick={() => {
+                                setStartDate("");
+                                setEndDate("");
+                                onFilterChange({ startDate: "", endDate: "" });
+                            }}
+                            className="bg-gray-300 text-gray-800 px-6 py-2 rounded font-semibold hover:bg-gray-400 transition">
+                            Reset Filter
+                        </button>
+                    </div>
                 </div>
-
             </form>
         </div>
     );

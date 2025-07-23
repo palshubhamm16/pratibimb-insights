@@ -7,10 +7,12 @@ import {
     getTrendData,
     getTopDays,
     getTopSuspectNumbers,
+    getScamReportByNumber,
 } from '../controllers/stateController.js';
 
 const router = express.Router();
 
+router.get("/scam-count", getScamReportByNumber);
 router.get('/:stateName/summary', getStateSummary);
 router.get('/:stateName/top-districts', getTopDistricts);
 router.get('/:stateName/category-distribution', getCategoryDistribution);

@@ -19,6 +19,7 @@ import {
     fetchCategoryDistribution,
     fetchTrendData,
     fetchTopDays,
+    fetchTopSuspects,
 } from "../utils/api/stateApi";
 
 export default function StatePage() {
@@ -37,6 +38,7 @@ export default function StatePage() {
     const [categoryData, setCategoryData] = useState([]);
     const [trendData, setTrendData] = useState({});
     const [topDays, setTopDays] = useState([]);
+    const [topSuspects, setTopSuspects] = useState([]);
 
     const handleFilterChange = ({ startDate, endDate }) => {
         setDateRange({ startDate, endDate });
@@ -46,12 +48,13 @@ export default function StatePage() {
         try {
             const stateParam = stateName;
 
-            const [summary, districts, categories, trends, days] = await Promise.all([
+            const [summary, districts, categories, trends, days, suspects] = await Promise.all([
                 fetchStateSummary(stateParam, startDate, endDate),
                 fetchTopDistricts(stateParam, startDate, endDate),
                 fetchCategoryDistribution(stateParam, startDate, endDate),
                 fetchTrendData(stateParam, startDate, endDate),
                 fetchTopDays(stateParam, startDate, endDate),
+                fetchTopSuspects(stateParam, startDate, endDate),
             ]);
 
             setSummaryData(summary);
@@ -65,8 +68,11 @@ export default function StatePage() {
             // console.log("Top Districts:", topDistricts);
             setCategoryData(categories);
             setTrendData(trends);
-            console.log("Trend Data:", trends.totalTrendData);
+            // console.log("Trend Data:", trends.totalTrendData);
             setTopDays(days);
+            setTopSuspects(suspects);
+            console.log("Top Suspects:", suspects);
+
         } catch (error) {
             console.error("Error loading state data:", error);
         }
@@ -80,19 +86,6 @@ export default function StatePage() {
         loadData(startDate, endDate);
     }, [stateName, dateRange]);
 
-    // Static mock for non-date-filtered components
-    const mockTopSuspects = [
-        { number: "9876543210", count: 12 },
-        { number: "9123456789", count: 10 },
-        { number: "9988776655", count: 9 },
-        { number: "9000012345", count: 8 },
-        { number: "8443322110", count: 7 },
-        { number: "8080808080", count: 6 },
-        { number: "9111222333", count: 5 },
-        { number: "7000000000", count: 4 },
-        { number: "9999999999", count: 3 },
-        { number: "8000000001", count: 3 },
-    ];
 
     const dummyData = Array.from({ length: 90 }).map((_, i) => ({
         date: dayjs().subtract(i, "day").format("YYYY-MM-DD"),
@@ -142,7 +135,7 @@ export default function StatePage() {
             {/* Static Charts */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-10">
                 <TopFraudDays data={topDays} />
-                <TopSuspectNumbers data={mockTopSuspects} />
+                <TopSuspectNumbers data={topSuspects} />
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-10">

@@ -257,3 +257,65 @@ export const getTopSuspectNumbers = async (req, res) => {
         res.status(500).json({ error: "Failed to fetch top suspects" });
     }
 };
+
+
+// controller for checking if a number is a scammer
+// export const getScamReportByNumber = async (req, res) => {
+//     const { number } = req.query;
+
+//     if (!number) {
+//         return res.status(400).json({ error: "Missing phone number" });
+//     }
+
+//     try {
+//         const reports = await FraudReport.find({ suspectNumber: number });
+
+//         if (reports.length === 0) {
+//             return res.json({ count: 0, locations: [] });
+//         }
+
+//         const locations = reports.map((report) => ({
+//             state: report.state,
+//             district: report.district,
+//             address: report.address || "",
+//             lat: report.location?.coordinates[1],
+//             lng: report.location?.coordinates[0],
+//         }));
+
+//         return res.json({
+//             count: reports.length,
+//             locations,
+//         });
+//     } catch (err) {
+//         console.error("Error fetching scam report:", err);
+//         res.status(500).json({ error: "Server error" });
+//     }
+// };
+
+
+export const getScamReportByNumber = async (req, res) => {
+    const number = req.query.number;
+
+    if (!number) {
+        return res.status(400).json({ message: "Missing number query param" });
+    }
+
+    try {
+        const reports = await FraudReport.find({ suspectNumber: number });
+
+        const count = reports.length;
+
+        const locations = reports.map((report) => ({
+            state: report.state,
+            district: report.district,
+            address: report.address,
+            lat: report.location?.coordinates?.[1],
+            lng: report.location?.coordinates?.[0],
+        }));
+
+        res.json({ count, locations });
+    } catch (err) {
+        console.error("Error in getScamCountByNumber:", err);
+        res.status(500).json({ message: "Server error" });
+    }
+};
