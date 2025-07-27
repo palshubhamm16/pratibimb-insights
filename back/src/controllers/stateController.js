@@ -319,3 +319,17 @@ export const getScamReportByNumber = async (req, res) => {
         res.status(500).json({ message: "Server error" });
     }
 };
+
+
+export const ackLookup = async (req,res) => {
+ const { ackNumber } = req.params;
+
+    const report = await FraudReport.findOne({ "victim.ackNumber": ackNumber });
+
+    if (!report) {
+        return res.status(404).json({ message: "No report found." });
+    }
+
+    res.json(report);
+
+}

@@ -12,6 +12,7 @@ import DateHeatmap from "../components/DateHeatmap";
 import TopFraudDays from "../components/TopFraudDays";
 import TopSuspectNumbers from "../components/TopSuspectNumbers";
 import ScammerCheck from "../components/ScammerCheck";
+import AckLookup from "../components/AckLookup";
 
 import {
     fetchStateSummary,
@@ -141,6 +142,9 @@ export default function StatePage() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-10">
                 <DateHeatmap data={dummyData} />
                 <ScammerCheck />
+            </div>
+            <div>
+<AckLookup />
             </div>
         </div>
     );
