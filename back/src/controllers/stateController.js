@@ -215,12 +215,12 @@ export async function getTopDays(req, res) {
 // controller for fetching top suspect numbers
 export const getTopSuspectNumbers = async (req, res) => {
     try {
-        const { state } = req.params;
+        const { stateName } = req.params;
         const { start, end } = req.query;
 
         const matchStage = {
-            state,
-            suspectNumber: { $ne: null },
+        state: stateName,
+        suspectNumber: { $ne: null },
         };
 
         // Apply date filter if both start and end are provided
@@ -332,4 +332,50 @@ export const ackLookup = async (req,res) => {
 
     res.json(report);
 
+}
+
+// controller for victim mapping summary
+export async function getVictimMappingSummary(req, res) {
+  try {
+    const { stateName } = req.params; // fraudster state
+    const { start, end } = req.query;
+
+    const matchStage = {
+      state: stateName, // fraudster state
+      "victim.state": { $ne: null }
+    };
+
+    if (start && end) {
+      matchStage.fetchedDate = {
+        $gte: new Date(start),
+        $lte: new Date(end)
+      };
+    }
+
+    const pipeline = [
+      { $match: matchStage },
+      {
+        $group: {
+          _id: "$victim.state",
+          victimCount: { $sum: 1 },
+          fraudAmount: { $sum: "$amount" }
+        }
+      },
+      {
+        $project: {
+          _id: 0,
+          state: "$_id",
+          victimCount: 1,
+          fraudAmount: 1
+        }
+      },
+      { $sort: { victimCount: -1 } }
+    ];
+
+    const result = await FraudReport.aggregate(pipeline);
+    res.json(result);
+  } catch (err) {
+    console.error("Error in victim-mapping:", err);
+    res.status(500).json({ error: "Failed to get victim mapping summary" });
+  }
 }

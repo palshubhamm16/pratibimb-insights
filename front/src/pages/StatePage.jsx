@@ -13,6 +13,7 @@ import TopFraudDays from "../components/TopFraudDays";
 import TopSuspectNumbers from "../components/TopSuspectNumbers";
 import ScammerCheck from "../components/ScammerCheck";
 import AckLookup from "../components/AckLookup";
+import VictimHeatmap from "../components/VictimHeatmap";
 
 import {
     fetchStateSummary,
@@ -21,6 +22,7 @@ import {
     fetchTrendData,
     fetchTopDays,
     fetchTopSuspects,
+    fetchVictimMapping,
 } from "../utils/api/stateApi";
 
 export default function StatePage() {
@@ -40,6 +42,8 @@ export default function StatePage() {
     const [trendData, setTrendData] = useState({});
     const [topDays, setTopDays] = useState([]);
     const [topSuspects, setTopSuspects] = useState([]);
+    const [victimMapping, setVictimMapping] = useState([]);
+
 
     const handleFilterChange = ({ startDate, endDate }) => {
         setDateRange({ startDate, endDate });
@@ -49,15 +53,19 @@ export default function StatePage() {
         try {
             const stateParam = stateName;
 
-            const [summary, districts, categories, trends, days, suspects] = await Promise.all([
+            const [summary, districts, categories, trends, days, suspects, mapping] = await Promise.all([
                 fetchStateSummary(stateParam, startDate, endDate),
                 fetchTopDistricts(stateParam, startDate, endDate),
                 fetchCategoryDistribution(stateParam, startDate, endDate),
                 fetchTrendData(stateParam, startDate, endDate),
                 fetchTopDays(stateParam, startDate, endDate),
                 fetchTopSuspects(stateParam, startDate, endDate),
+                    fetchVictimMapping(stateParam, startDate, endDate), // <--- ADD THIS
+
             ]);
 
+            setVictimMapping(mapping);
+            console.log("Victim Mapping:", mapping);
             setSummaryData(summary);
             setAllDistricts(districts);
             setTopDistricts(
@@ -122,6 +130,10 @@ export default function StatePage() {
             {/* Top Districts */}
             <div className="mb-10">
                 <TopDistrictsBarChart data={topDistricts} />
+            </div>
+
+            <div className="mb-10">
+<VictimHeatmap data={victimMapping} />
             </div>
 
             {/* Trend & Category Pie */}

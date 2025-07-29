@@ -31,8 +31,8 @@ export default function AckLookup() {
     };
 
     return (
-        <div className="bg-white p-4 rounded-lg shadow">
-            <h2 className="text-lg font-semibold mb-4">ACK Number Lookup:</h2>
+        <div className="bg-white p-4 rounded-lg shadow mb-4">
+            <h2 className="text-lg font-semibold mb-2">ACK Number Lookup:</h2>
             <div className="flex items-center gap-2">
                 <input
                     type="text"
@@ -43,7 +43,7 @@ export default function AckLookup() {
                 />
                 <button
                     onClick={handleSearch}
-                    className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 text-sm"
+                    className="bg-green-600 text-white mt-2 mb-2 px-4 py-2 rounded hover:bg-blue-700 text-sm"
                 >
                     Search
                 </button>

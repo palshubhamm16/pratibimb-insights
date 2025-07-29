@@ -138,7 +138,7 @@ export default function StateMap({ stateName, districtData = {} }) {
         <div className="bg-white rounded-xl shadow p-4 relative">
             <div className="flex justify-between items-center mb-4">
                 <h2 className="text-lg font-semibold text-center w-full">
-                    District-wise Heatmap – {stateName}
+                    Fraud Source Distribution by District – {stateName}
                 </h2>
                 <button
                     onClick={() => setShowCircles((prev) => !prev)}
