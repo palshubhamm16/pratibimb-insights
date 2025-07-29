@@ -1,8 +1,6 @@
 // controllers/stateController.js
 import FraudReport from '../models/FraudReport.js';
-import { startOfMonth, subMonths } from "date-fns";
 
-// Utility to handle date and category filters
 function getDateFilter(start, end) {
     if (!start || !end) return {};
     return {
@@ -13,23 +11,13 @@ function getDateFilter(start, end) {
     };
 }
 
-function getCategoryFilter(categories) {
-    if (!categories || categories.length === 0) return {};
-    return {
-        category: { $in: Array.isArray(categories) ? categories : [categories] },
-    };
-}
-
-// SUMMARY
 export async function getStateSummary(req, res) {
     try {
         const { stateName } = req.params;
-        const { start, end, categories } = req.query;
-        const match = {
-            state: stateName,
-            ...getDateFilter(start, end),
-            ...getCategoryFilter(categories),
-        };
+        const { start, end } = req.query;
+        const dateFilter = getDateFilter(start, end);
+
+        const match = { state: stateName, ...dateFilter };
 
         const totalCases = await FraudReport.countDocuments(match);
 
@@ -58,16 +46,13 @@ export async function getStateSummary(req, res) {
     }
 }
 
-// TOP DISTRICTS
 export async function getTopDistricts(req, res) {
     try {
         const { stateName } = req.params;
-        const { start, end, categories } = req.query;
-        const match = {
-            state: stateName,
-            ...getDateFilter(start, end),
-            ...getCategoryFilter(categories),
-        };
+        const { start, end } = req.query;
+        const dateFilter = getDateFilter(start, end);
+
+        const match = { state: stateName, ...dateFilter };
 
         const result = await FraudReport.aggregate([
             { $match: match },
@@ -85,16 +70,13 @@ export async function getTopDistricts(req, res) {
     }
 }
 
-// CATEGORY DISTRIBUTION
 export async function getCategoryDistribution(req, res) {
     try {
         const { stateName } = req.params;
-        const { start, end, categories } = req.query;
-        const match = {
-            state: stateName,
-            ...getDateFilter(start, end),
-            ...getCategoryFilter(categories),
-        };
+        const { start, end } = req.query;
+        const dateFilter = getDateFilter(start, end);
+
+        const match = { state: stateName, ...dateFilter };
 
         const result = await FraudReport.aggregate([
             { $match: match },
@@ -108,12 +90,13 @@ export async function getCategoryDistribution(req, res) {
     }
 }
 
-// TREND DATA
+import { startOfMonth, subMonths } from "date-fns";
 export async function getTrendData(req, res) {
     try {
         const { stateName } = req.params;
-        const { start: startQ, end: endQ, categories } = req.query;
+        const { start: startQ, end: endQ } = req.query;
 
+        // Default: Last 12 full months
         const defaultEnd = startOfMonth(new Date());
         const defaultStart = subMonths(defaultEnd, 12);
 
@@ -123,9 +106,9 @@ export async function getTrendData(req, res) {
         const match = {
             state: stateName,
             fetchedDate: { $gte: startDate, $lt: endDate },
-            ...getCategoryFilter(categories),
         };
 
+        // Total monthly trend
         const monthlyCases = await FraudReport.aggregate([
             { $match: match },
             {
@@ -142,6 +125,7 @@ export async function getTrendData(req, res) {
             count: d.count,
         }));
 
+        // Category-wise monthly trend
         const categoryMonthly = await FraudReport.aggregate([
             { $match: match },
             {
@@ -155,15 +139,22 @@ export async function getTrendData(req, res) {
             },
         ]);
 
+        // Step 1: Determine top 5 categories overall
         const topCategoriesAgg = await FraudReport.aggregate([
             { $match: match },
-            { $group: { _id: "$category", count: { $sum: 1 } } },
+            {
+                $group: {
+                    _id: "$category",
+                    count: { $sum: 1 },
+                },
+            },
             { $sort: { count: -1 } },
             { $limit: 5 },
         ]);
 
         const topCategories = topCategoriesAgg.map(c => c._id);
 
+        // Step 2: Format category-wise monthly data
         const categoryTrendMap = {};
         categoryMonthly.forEach(({ _id, count }) => {
             const { month, category } = _id;
@@ -173,6 +164,7 @@ export async function getTrendData(req, res) {
             categoryTrendMap[month][category] = count;
         });
 
+        // Step 3: Prepare structured array
         const allMonths = totalTrendData.map(d => d.month);
         const categoryTrendData = allMonths.map(month => {
             const entry = { month };
@@ -192,16 +184,14 @@ export async function getTrendData(req, res) {
     }
 }
 
-// TOP DAYS
+
 export async function getTopDays(req, res) {
     try {
         const { stateName } = req.params;
-        const { start, end, categories } = req.query;
-        const match = {
-            state: stateName,
-            ...getDateFilter(start, end),
-            ...getCategoryFilter(categories),
-        };
+        const { start, end } = req.query;
+        const dateFilter = getDateFilter(start, end);
+
+        const match = { state: stateName, ...dateFilter };
 
         const result = await FraudReport.aggregate([
             { $match: match },
@@ -221,18 +211,25 @@ export async function getTopDays(req, res) {
     }
 }
 
-// TOP SUSPECT NUMBERS
+
+// controller for fetching top suspect numbers
 export const getTopSuspectNumbers = async (req, res) => {
     try {
         const { stateName } = req.params;
-        const { start, end, categories } = req.query;
+        const { start, end } = req.query;
 
         const matchStage = {
-            state: stateName,
-            suspectNumber: { $ne: null },
-            ...getDateFilter(start, end),
-            ...getCategoryFilter(categories),
+        state: stateName,
+        suspectNumber: { $ne: null },
         };
+
+        // Apply date filter if both start and end are provided
+        if (start && end) {
+            matchStage.fetchedDate = {
+                $gte: new Date(start),
+                $lte: new Date(end),
+            };
+        }
 
         const pipeline = [
             { $match: matchStage },
@@ -261,7 +258,41 @@ export const getTopSuspectNumbers = async (req, res) => {
     }
 };
 
-// SCAMMER CHECK
+
+// controller for checking if a number is a scammer
+// export const getScamReportByNumber = async (req, res) => {
+//     const { number } = req.query;
+
+//     if (!number) {
+//         return res.status(400).json({ error: "Missing phone number" });
+//     }
+
+//     try {
+//         const reports = await FraudReport.find({ suspectNumber: number });
+
+//         if (reports.length === 0) {
+//             return res.json({ count: 0, locations: [] });
+//         }
+
+//         const locations = reports.map((report) => ({
+//             state: report.state,
+//             district: report.district,
+//             address: report.address || "",
+//             lat: report.location?.coordinates[1],
+//             lng: report.location?.coordinates[0],
+//         }));
+
+//         return res.json({
+//             count: reports.length,
+//             locations,
+//         });
+//     } catch (err) {
+//         console.error("Error fetching scam report:", err);
+//         res.status(500).json({ error: "Server error" });
+//     }
+// };
+
+
 export const getScamReportByNumber = async (req, res) => {
     const number = req.query.number;
 
@@ -289,9 +320,10 @@ export const getScamReportByNumber = async (req, res) => {
     }
 };
 
-// ACK LOOKUP
-export const ackLookup = async (req, res) => {
-    const { ackNumber } = req.params;
+
+export const ackLookup = async (req,res) => {
+ const { ackNumber } = req.params;
+
     const report = await FraudReport.findOne({ "victim.ackNumber": ackNumber });
 
     if (!report) {
@@ -299,45 +331,51 @@ export const ackLookup = async (req, res) => {
     }
 
     res.json(report);
+
 }
 
-// VICTIM MAPPING
+// controller for victim mapping summary
 export async function getVictimMappingSummary(req, res) {
-    try {
-        const { stateName } = req.params;
-        const { start, end, categories } = req.query;
+  try {
+    const { stateName } = req.params; // fraudster state
+    const { start, end } = req.query;
 
-        const matchStage = {
-            state: stateName,
-            "victim.state": { $ne: null },
-            ...getDateFilter(start, end),
-            ...getCategoryFilter(categories),
-        };
+    const matchStage = {
+      state: stateName, // fraudster state
+      "victim.state": { $ne: null }
+    };
 
-        const pipeline = [
-            { $match: matchStage },
-            {
-                $group: {
-                    _id: "$victim.state",
-                    victimCount: { $sum: 1 },
-                    fraudAmount: { $sum: "$amount" }
-                }
-            },
-            {
-                $project: {
-                    _id: 0,
-                    state: "$_id",
-                    victimCount: 1,
-                    fraudAmount: 1
-                }
-            },
-            { $sort: { victimCount: -1 } }
-        ];
-
-        const result = await FraudReport.aggregate(pipeline);
-        res.json(result);
-    } catch (err) {
-        console.error("Error in victim-mapping:", err);
-        res.status(500).json({ error: "Failed to get victim mapping summary" });
+    if (start && end) {
+      matchStage.fetchedDate = {
+        $gte: new Date(start),
+        $lte: new Date(end)
+      };
     }
+
+    const pipeline = [
+      { $match: matchStage },
+      {
+        $group: {
+          _id: "$victim.state",
+          victimCount: { $sum: 1 },
+          fraudAmount: { $sum: "$amount" }
+        }
+      },
+      {
+        $project: {
+          _id: 0,
+          state: "$_id",
+          victimCount: 1,
+          fraudAmount: 1
+        }
+      },
+      { $sort: { victimCount: -1 } }
+    ];
+
+    const result = await FraudReport.aggregate(pipeline);
+    res.json(result);
+  } catch (err) {
+    console.error("Error in victim-mapping:", err);
+    res.status(500).json({ error: "Failed to get victim mapping summary" });
+  }
 }

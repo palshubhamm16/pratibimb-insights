@@ -32,40 +32,40 @@ export default function StatePage() {
         .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
         .join(" ");
 
-    const [dateRange, setDateRange] = useState({ startDate: null, endDate: null });
+    const [filters, setFilters] = useState({
+        startDate: null,
+        endDate: null,
+        categories: [],
+    });
 
     const [summaryData, setSummaryData] = useState(null);
     const [topDistricts, setTopDistricts] = useState([]);
     const [allDistricts, setAllDistricts] = useState([]);
-
     const [categoryData, setCategoryData] = useState([]);
     const [trendData, setTrendData] = useState({});
     const [topDays, setTopDays] = useState([]);
     const [topSuspects, setTopSuspects] = useState([]);
     const [victimMapping, setVictimMapping] = useState([]);
 
-
-    const handleFilterChange = ({ startDate, endDate }) => {
-        setDateRange({ startDate, endDate });
+    const handleFilterChange = ({ startDate, endDate, categories }) => {
+        setFilters({ startDate, endDate, categories });
     };
 
-    const loadData = async (startDate = null, endDate = null) => {
+    const loadData = async (startDate = null, endDate = null, categories = []) => {
         try {
             const stateParam = stateName;
 
-            const [summary, districts, categories, trends, days, suspects, mapping] = await Promise.all([
-                fetchStateSummary(stateParam, startDate, endDate),
-                fetchTopDistricts(stateParam, startDate, endDate),
-                fetchCategoryDistribution(stateParam, startDate, endDate),
-                fetchTrendData(stateParam, startDate, endDate),
-                fetchTopDays(stateParam, startDate, endDate),
-                fetchTopSuspects(stateParam, startDate, endDate),
-                    fetchVictimMapping(stateParam, startDate, endDate), // <--- ADD THIS
+            const [summary, districts, categoriesData, trends, days, suspects, mapping] =
+                await Promise.all([
+                    fetchStateSummary(stateParam, startDate, endDate, categories),
+                    fetchTopDistricts(stateParam, startDate, endDate, categories),
+                    fetchCategoryDistribution(stateParam, startDate, endDate, categories),
+                    fetchTrendData(stateParam, startDate, endDate, categories),
+                    fetchTopDays(stateParam, startDate, endDate, categories),
+                    fetchTopSuspects(stateParam, startDate, endDate, categories),
+                    fetchVictimMapping(stateParam, startDate, endDate, categories),
+                ]);
 
-            ]);
-
-            setVictimMapping(mapping);
-            console.log("Victim Mapping:", mapping);
             setSummaryData(summary);
             setAllDistricts(districts);
             setTopDistricts(
@@ -74,27 +74,21 @@ export default function StatePage() {
                     .sort((a, b) => b.count - a.count)
                     .slice(0, 10)
             );
-            // console.log("Top Districts:", topDistricts);
-            setCategoryData(categories);
+            setCategoryData(categoriesData);
             setTrendData(trends);
-            // console.log("Trend Data:", trends.totalTrendData);
             setTopDays(days);
             setTopSuspects(suspects);
-            console.log("Top Suspects:", suspects);
+            setVictimMapping(mapping);
 
         } catch (error) {
             console.error("Error loading state data:", error);
         }
     };
-    // console.log("Top Districts:", topDistricts);
-
-
 
     useEffect(() => {
-        const { startDate, endDate } = dateRange;
-        loadData(startDate, endDate);
-    }, [stateName, dateRange]);
-
+        const { startDate, endDate, categories } = filters;
+        loadData(startDate, endDate, categories);
+    }, [stateName, filters]);
 
     const dummyData = Array.from({ length: 90 }).map((_, i) => ({
         date: dayjs().subtract(i, "day").format("YYYY-MM-DD"),
@@ -113,7 +107,7 @@ export default function StatePage() {
                 <StateMap stateName={stateName} districtData={allDistricts} />
             </div>
 
-            {/* Date Filter */}
+            {/* Filter */}
             <DateFilter onFilterChange={handleFilterChange} />
 
             {/* Summary Cards */}
@@ -132,11 +126,12 @@ export default function StatePage() {
                 <TopDistrictsBarChart data={topDistricts} />
             </div>
 
+            {/* Victim Map */}
             <div className="mb-10">
-<VictimHeatmap data={victimMapping} />
+                <VictimHeatmap data={victimMapping} />
             </div>
 
-            {/* Trend & Category Pie */}
+            {/* Trends & Category */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-10">
                 <TrendGraph
                     totalData={trendData.totalTrendData}
@@ -145,18 +140,20 @@ export default function StatePage() {
                 <FraudCategoryPieChart data={categoryData} />
             </div>
 
-            {/* Static Charts */}
+            {/* Other Charts */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-10">
                 <TopFraudDays data={topDays} />
                 <TopSuspectNumbers data={topSuspects} />
             </div>
 
+            {/* Misc */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-10">
                 <DateHeatmap data={dummyData} />
                 <ScammerCheck />
             </div>
+
             <div>
-<AckLookup />
+                <AckLookup />
             </div>
         </div>
     );
