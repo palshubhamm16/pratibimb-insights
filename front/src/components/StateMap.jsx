@@ -92,6 +92,7 @@ export const stateProjectionMap = {
 export default function StateMap({ stateName, districtData = {} }) {
     const [geoData, setGeoData] = useState(null);
     const [hoveredDistrict, setHoveredDistrict] = useState(null);
+    const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
     const [showCircles, setShowCircles] = useState(true);
 
     useEffect(() => {
@@ -164,7 +165,7 @@ export default function StateMap({ stateName, districtData = {} }) {
                                 const count = districtData[district?.toUpperCase?.()] || 0;
                                 const fillColor =
                                     count === 0
-                                        ? "#e5e7eb" // default greyish color for districts with no data
+                                        ? "#e5e7eb"
                                         : showCircles
                                             ? "rgba(156, 163, 175, 0.45)"
                                             : colorScale(count);
@@ -173,7 +174,13 @@ export default function StateMap({ stateName, districtData = {} }) {
                                     <Geography
                                         key={geo.rsmKey}
                                         geography={geo}
-                                        onMouseEnter={() => setHoveredDistrict(district)}
+                                        onMouseEnter={(e) => {
+                                            setHoveredDistrict(district);
+                                            setMousePosition({ x: e.clientX, y: e.clientY });
+                                        }}
+                                        onMouseMove={(e) => {
+                                            setMousePosition({ x: e.clientX, y: e.clientY });
+                                        }}
                                         onMouseLeave={() => setHoveredDistrict(null)}
                                         style={{
                                             default: {
@@ -208,7 +215,6 @@ export default function StateMap({ stateName, districtData = {} }) {
                             if (count === 0) return null;
 
                             const centroid = d3.geoCentroid(feature);
-                            // Use minFraud and maxFraud for consistent scaling
                             const radiusScale = d3Scale
                                 .scaleSqrt()
                                 .domain([minFraud, maxFraud])
@@ -240,13 +246,20 @@ export default function StateMap({ stateName, districtData = {} }) {
             )}
 
             {hoveredDistrict && (
-                <div className="mt-4 text-center">
-                    <p className="text-md font-medium text-gray-700">
-                        District: {hoveredDistrict}
-                    </p>
-                    <p className="text-sm text-gray-500">
+                <div
+                    className="pointer-events-none absolute z-50 px-3 py-2 rounded-xl bg-white border border-gray-300 shadow-lg"
+                    style={{
+                        top: mousePosition.y - 5,
+                        left: mousePosition.x + 5,
+                        minWidth: "180px",
+                    }}
+                >
+                    <div className="text-sm font-semibold text-gray-800">
+                        {hoveredDistrict}
+                    </div>
+                    <div className="text-sm text-red-600">
                         Fraud Reports: {districtData[hoveredDistrict?.toUpperCase?.()] || 0}
-                    </p>
+                    </div>
                 </div>
             )}
         </div>

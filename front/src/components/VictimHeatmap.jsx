@@ -8,12 +8,11 @@ import { useNavigate } from "react-router-dom";
 import * as d3 from "d3";
 import indiaGeo from "../data/india.json";
 
-// ✅ This component now accepts data prop from backend
 export default function VictimHeatmap({ data = [] }) {
   const [hoveredState, setHoveredState] = useState(null);
+  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const navigate = useNavigate();
 
-  // ✅ Convert API array to a dictionary: { DELHI: { victims, amount }, ... }
   const fraudData = data.reduce((acc, curr) => {
     acc[curr.state.toUpperCase()] = {
       victims: curr.victimCount,
@@ -22,7 +21,6 @@ export default function VictimHeatmap({ data = [] }) {
     return acc;
   }, {});
 
-  // ✅ Setup color scale based on max victims
   const counts = Object.values(fraudData).map((d) => d?.victims || 0);
   const maxVictims = counts.length > 0 ? Math.max(...counts) : 1;
   const colorScale = d3.scaleSequential(d3.interpolateReds).domain([0, maxVictims]);
@@ -57,6 +55,9 @@ export default function VictimHeatmap({ data = [] }) {
                   key={geo.rsmKey}
                   geography={geo}
                   onMouseEnter={() => setHoveredState(stateName)}
+                  onMouseMove={(evt) =>
+                    setMousePosition({ x: evt.clientX, y: evt.clientY })
+                  }
                   onMouseLeave={() => setHoveredState(null)}
                   onClick={() => navigate(`/state/${stateName}`)}
                   style={{
@@ -83,7 +84,7 @@ export default function VictimHeatmap({ data = [] }) {
         </Geographies>
       </ComposableMap>
 
-      {/* ✅ Color Legend */}
+      {/* Color Legend */}
       <div className="absolute top-[340px] left-6 w-3 h-64 bg-gradient-to-t from-[#fee5d9] to-[#a50f15] rounded">
         <div className="absolute right-[-50px] top-0 text-sm text-gray-600">
           {maxVictims}
@@ -99,16 +100,25 @@ export default function VictimHeatmap({ data = [] }) {
         </div>
       </div>
 
-      {/* ✅ Hover Info */}
+      {/* Floating Tooltip */}
       {hoveredState && (
-        <div className="mt-4 text-center text-gray-700">
-          <p className="text-lg font-medium">{hoveredState}</p>
-          <p className="text-sm">
+        <div
+          className="pointer-events-none absolute z-50 px-3 py-2 rounded-xl bg-white border border-gray-300 shadow-lg"
+          style={{
+            top: mousePosition.y + 10,
+            left: mousePosition.x + 10,
+            minWidth: "180px",
+          }}
+        >
+          <div className="text-sm font-semibold text-gray-800">
+            {hoveredState}
+          </div>
+          <div className="text-sm text-red-600">
             Victims: {fraudData[hoveredState]?.victims || 0}
-          </p>
-          <p className="text-sm">
-            Total Fraud ₹: {fraudData[hoveredState]?.amount?.toLocaleString() || 0}
-          </p>
+          </div>
+          <div className="text-sm text-green-600">
+            ₹ {fraudData[hoveredState]?.amount?.toLocaleString() || 0}
+          </div>
         </div>
       )}
     </div>

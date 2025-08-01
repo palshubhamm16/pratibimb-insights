@@ -40,7 +40,7 @@ export default function Header() {
                                 Upload
                             </Link>
                         </li>
-                        <li>
+                        {/* <li>
                             <a href="/about" className="text-lg font-medium hover:underline">
                                 About
                             </a>
@@ -49,7 +49,7 @@ export default function Header() {
                             <a href="/contact" className="text-lg font-medium hover:underline">
                                 Contact
                             </a>
-                        </li>
+                        </li> */}
                     </ul>
                 </nav>
             </div>

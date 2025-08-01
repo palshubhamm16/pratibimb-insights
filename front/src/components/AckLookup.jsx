@@ -60,7 +60,7 @@ export default function AckLookup() {
                     <p><strong>Victim Location:</strong> {result.victim.district}, {result.victim.state}</p>
                     <p><strong>Reported From:</strong> {result.district}, {result.state}</p>
                     <p>
-                        <strong>Coordinates:</strong>{" "}
+                        <strong>Scammer Coordinates:</strong>{" "}
                         <span className="text-xs text-gray-600">
                             ({result.location.coordinates[1]}, {result.location.coordinates[0]})
                         </span>
