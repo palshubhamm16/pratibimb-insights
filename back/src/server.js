@@ -5,6 +5,8 @@ import connectDB from './config/db.js';
 
 import uploadRoutes from './routes/uploadRoutes.js';
 import stateRoutes from './routes/stateRoutes.js';
+import countryRoutes from "./routes/countryRoutes.js";
+
 
 
 dotenv.config();
@@ -18,7 +20,7 @@ app.use(express.json());
 
 app.use('/api/uploads', uploadRoutes);
 app.use('/api/states', stateRoutes);
-
+app.use("/api/country", countryRoutes);
 
 
 connectDB();
