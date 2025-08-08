@@ -35,10 +35,11 @@ const getRelativeColor = (count) =>
 
 export default function IndiaHeatmap() {
     const [hoveredState, setHoveredState] = useState(null);
+    const [tooltipPos, setTooltipPos] = useState({ x: 0, y: 0 });
     const navigate = useNavigate();
 
     return (
-        <div className="bg-white p-4 rounded-2xl shadow mb-6 relative">
+        <div className="bg-white p-4 rounded-2xl shadow mb-6 relative mx-[40px]">
             <div className="mb-4 text-center">
                 <h2 className="text-2xl font-semibold mb-4">
                     State-wise Fraud Heatmap
@@ -57,23 +58,29 @@ export default function IndiaHeatmap() {
                     {({ geographies }) =>
                         geographies.map((geo) => {
                             const stateName = geo.properties.st_nm;
-                            const isHovered = hoveredState === stateName;
                             const value = mockFraudData[stateName] || 0;
 
                             return (
                                 <Geography
                                     key={geo.rsmKey}
                                     geography={geo}
-                                    onMouseEnter={() => setHoveredState(stateName)}
-                                    onMouseLeave={() => setHoveredState(null)}
+                                    onMouseEnter={(e) => {
+                                        setHoveredState(stateName);
+                                        setTooltipPos({ x: e.clientX, y: e.clientY });
+                                    }}
+                                    onMouseMove={(e) => {
+                                        setTooltipPos({ x: e.clientX, y: e.clientY });
+                                    }}
+                                    onMouseLeave={() => {
+                                        setHoveredState(null);
+                                    }}
                                     onClick={() => navigate(`/state/${stateName}`)}
                                     style={{
                                         default: {
                                             fill: getRelativeColor(value),
                                             outline: "none",
-                                            stroke: isHovered ? "#1e40af" : "#fff",
-                                            strokeWidth: isHovered ? 2 : 0.5,
-                                            filter: isHovered ? "drop-shadow(0 0 6px rgba(0,0,0,0.4))" : "none",
+                                            stroke: "#fff",
+                                            strokeWidth: 0.5,
                                             transition: "all 0.3s ease-in-out",
                                         },
                                         hover: {
@@ -108,11 +115,20 @@ export default function IndiaHeatmap() {
                 </div>
             </div>
 
+            {/* Floating Tooltip */}
             {hoveredState && (
-                <div className="mt-4 text-center text-gray-700">
-                    <p className="text-lg font-medium">{hoveredState}</p>
-                    <p className="text-sm">
-                        Mock Reports: {mockFraudData[hoveredState] || 0}
+                <div
+                    className="absolute bg-white shadow-md rounded px-3 py-2 text-sm border border-gray-300 pointer-events-none"
+                    style={{
+                        top: tooltipPos.y + 10,
+                        left: tooltipPos.x + 10,
+                        transform: "translate(-50%, -100%)",
+                        zIndex: 1000,
+                    }}
+                >
+                    <p className="font-bold">{hoveredState}</p>
+                    <p className="text-red-600 font-semibold">
+                        Reports: {mockFraudData[hoveredState] || 0}
                     </p>
                 </div>
             )}

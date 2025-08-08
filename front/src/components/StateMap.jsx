@@ -136,7 +136,7 @@ export default function StateMap({ stateName, districtData = {} }) {
         .range(["#fee5d9", "#a50f15"]);
 
     return (
-        <div className="bg-white rounded-xl shadow p-4 relative">
+        <div className="bg-white rounded-xl shadow p-4 relative mx-[40px]">
             <div className="flex justify-between items-center mb-4">
                 <h2 className="text-lg font-semibold text-center w-full">
                     Fraud Source Distribution by District – {stateName}

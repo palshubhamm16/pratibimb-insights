@@ -51,3 +51,9 @@ export async function fetchVictimMapping(state, start, end, categories = []) {
     const res = await api.get(`/states/${state}/victim-mapping${buildQuery(start, end, categories)}`);
     return res.data;
 }
+
+// ✅ New: Daily Heatmap Data (DateHeatmap)
+export async function fetchStateDailyFraudCounts(state, start, end, categories = []) {
+    const res = await api.get(`/states/${state}/trends/daily${buildQuery(start, end, categories)}`);
+    return res.data;
+}

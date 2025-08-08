@@ -1,9 +1,9 @@
 import { Link } from "react-router-dom";
-import meityLogo from "../assets/meity-logo.png"; // Replace with actual path
+import meityLogo from "../assets/image.png"; // Replace with actual path
 
 export default function Header() {
     return (
-        <div className="w-full bg-white shadow border-b px-6 py-3">
+        <div className="w-full bg-gradient-to-b from-blue-800/90 to-blue-500/90 shadow border-b px-6 py-3">
             <div className="flex justify-between mx-auto mb-2">
                 <a
                     href="https://www.meity.gov.in/"
@@ -22,14 +22,14 @@ export default function Header() {
                 {/* Left: Logo + Title */}
                 <Link to="/" className="flex items-center space-x-3">
 
-                    <h1 className="text-3xl sm:text-5xl font-extrabold ml-1 tracking-tight text-blue-800/90">
+                    <h1 className="text-3xl sm:text-5xl font-extrabold ml-1 tracking-tight text-white">
                         Pratibimb Insights
                     </h1>
                 </Link>
 
                 {/* Right: Nav Links */}
                 <nav>
-                    <ul className="flex space-x-4">
+                    <ul className="flex space-x-4 text-white">
                         <li>
                             <Link to="/" className="text-lg font-medium hover:underline">
                                 Home

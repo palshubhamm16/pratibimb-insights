@@ -1,6 +1,5 @@
 import { useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
-import dayjs from "dayjs";
 
 import StateMap from "../components/StateMap";
 import StateSummaryCards from "../components/StateSummaryCards";
@@ -23,6 +22,7 @@ import {
     fetchTopDays,
     fetchTopSuspects,
     fetchVictimMapping,
+    fetchStateDailyFraudCounts,
 } from "../utils/api/stateApi";
 
 export default function StatePage() {
@@ -46,6 +46,7 @@ export default function StatePage() {
     const [topDays, setTopDays] = useState([]);
     const [topSuspects, setTopSuspects] = useState([]);
     const [victimMapping, setVictimMapping] = useState([]);
+    const [heatmapData, setHeatmapData] = useState([]);
 
     const handleFilterChange = ({ startDate, endDate, categories }) => {
         setFilters({ startDate, endDate, categories });
@@ -55,16 +56,25 @@ export default function StatePage() {
         try {
             const stateParam = stateName;
 
-            const [summary, districts, categoriesData, trends, days, suspects, mapping] =
-                await Promise.all([
-                    fetchStateSummary(stateParam, startDate, endDate, categories),
-                    fetchTopDistricts(stateParam, startDate, endDate, categories),
-                    fetchCategoryDistribution(stateParam, startDate, endDate, categories),
-                    fetchTrendData(stateParam, startDate, endDate, categories),
-                    fetchTopDays(stateParam, startDate, endDate, categories),
-                    fetchTopSuspects(stateParam, startDate, endDate, categories),
-                    fetchVictimMapping(stateParam, startDate, endDate, categories),
-                ]);
+            const [
+                summary,
+                districts,
+                categoriesData,
+                trends,
+                days,
+                suspects,
+                mapping,
+                dailyFraudCounts
+            ] = await Promise.all([
+                fetchStateSummary(stateParam, startDate, endDate, categories),
+                fetchTopDistricts(stateParam, startDate, endDate, categories),
+                fetchCategoryDistribution(stateParam, startDate, endDate, categories),
+                fetchTrendData(stateParam, startDate, endDate, categories),
+                fetchTopDays(stateParam, startDate, endDate, categories),
+                fetchTopSuspects(stateParam, startDate, endDate, categories),
+                fetchVictimMapping(stateParam, startDate, endDate, categories),
+                fetchStateDailyFraudCounts(stateParam, startDate, endDate, categories),
+            ]);
 
             setSummaryData(summary);
             setAllDistricts(districts);
@@ -79,6 +89,7 @@ export default function StatePage() {
             setTopDays(days);
             setTopSuspects(suspects);
             setVictimMapping(mapping);
+            setHeatmapData(dailyFraudCounts);
 
         } catch (error) {
             console.error("Error loading state data:", error);
@@ -89,11 +100,6 @@ export default function StatePage() {
         const { startDate, endDate, categories } = filters;
         loadData(startDate, endDate, categories);
     }, [stateName, filters]);
-
-    const dummyData = Array.from({ length: 90 }).map((_, i) => ({
-        date: dayjs().subtract(i, "day").format("YYYY-MM-DD"),
-        count: Math.floor(Math.random() * 10),
-    }));
 
     return (
         <div className="p-6 bg-blue-200/30 min-h-screen">
@@ -148,7 +154,7 @@ export default function StatePage() {
 
             {/* Misc */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-10">
-                <DateHeatmap data={dummyData} />
+                <DateHeatmap data={heatmapData} />
                 <ScammerCheck />
             </div>
 

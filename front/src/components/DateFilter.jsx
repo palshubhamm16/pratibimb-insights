@@ -48,7 +48,7 @@ export default function DateFilter({ onFilterChange }) {
   };
 
   return (
-    <div className="w-full max-w-7xl mx-auto px-6 py-6 mb-6 bg-white rounded-xl shadow-md border border-gray-200">
+    <div className="w-full max-w-7xl mx-auto px-6 py-6 mb-6 bg-white rounded-xl shadow-md border border-gray-200 ring-1 ring-blue-300/50">
       <div className="mb-6 text-center">
         <h2 className="text-2xl font-semibold text-gray-800">Advanced Filter</h2>
         <p className="text-sm text-gray-600 mt-1">
@@ -92,7 +92,7 @@ export default function DateFilter({ onFilterChange }) {
             {categoriesList.map((category) => (
               <label
                 key={category}
-                className="flex items-center bg-gray-100 hover:bg-gray-200 px-3 py-2 rounded cursor-pointer transition border border-gray-300">
+                className="flex items-center bg-blue-100/25 hover:bg-gray-200 px-3 py-2 rounded cursor-pointer transition border border-gray-300">
                 <input
                   type="checkbox"
                   value={category}

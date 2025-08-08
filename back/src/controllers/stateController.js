@@ -1,6 +1,9 @@
 // controllers/stateController.js
 import FraudReport from '../models/FraudReport.js';
 import { startOfMonth, subMonths } from "date-fns";
+import dayjs from "dayjs";
+
+
 
 // Utility to handle date and category filters
 function getDateFilter(start, end) {
@@ -341,3 +344,61 @@ export async function getVictimMappingSummary(req, res) {
         res.status(500).json({ error: "Failed to get victim mapping summary" });
     }
 }
+
+// DAILY FRAUD COUNTS
+
+export const getStateDailyFraudCounts = async (req, res) => {
+    try {
+        const { state } = req.params;
+        const { days = 90, category, startDate, endDate } = req.query;
+
+        // Determine date range
+        const start = startDate
+            ? dayjs(startDate).startOf("day").toDate()
+            : dayjs().subtract(days - 1, "day").startOf("day").toDate();
+
+        const end = endDate
+            ? dayjs(endDate).endOf("day").toDate()
+            : dayjs().endOf("day").toDate();
+
+        // Match conditions
+        const match = {
+            state: state,
+            fetchedDate: { $gte: start, $lte: end },
+        };
+
+        if (category) {
+            match.category = category;
+        }
+
+        // Aggregate counts per date
+        const results = await FraudReport.aggregate([
+            { $match: match },
+            {
+                $group: {
+                    _id: "$fetchedDate",
+                    count: { $sum: 1 },
+                },
+            },
+            { $sort: { _id: 1 } },
+        ]);
+
+        // Fill missing dates with 0 counts
+        const filledResults = [];
+        for (let i = 0; i < days; i++) {
+            const date = dayjs(start).add(i, "day").format("YYYY-MM-DD");
+            const found = results.find(
+                (r) => dayjs(r._id).format("YYYY-MM-DD") === date
+            );
+            filledResults.push({
+                date,
+                count: found ? found.count : 0,
+            });
+        }
+
+        res.json(filledResults);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: "Failed to fetch state daily fraud counts" });
+    }
+};

@@ -12,7 +12,7 @@ export default function TopSuspectNumbers({ data }) {
             <ul className="divide-y divide-gray-200">
                 {data.map((item, idx) => (
                     <li key={idx} className="flex justify-between items-center py-2">
-                        <span className="text-gray-700">{item.number}</span>
+                        <span className="text-gray-700 font-semibold">{item.number}</span>
                         <span className="font-bold text-red-600">{item.count} cases</span>
                     </li>
                 ))}

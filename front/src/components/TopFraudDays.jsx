@@ -12,7 +12,7 @@ export default function TopFraudDays({ data }) {
             <ul className="divide-y divide-gray-200">
                 {data.map((entry, idx) => (
                     <li key={idx} className="flex justify-between items-center py-2">
-                        <span className="text-gray-700">
+                        <span className="text-gray-700 font-bold">
                             {dayjs(entry.date).format("DD MMM YYYY")}
                         </span>
                         <span className="font-bold text-blue-600">{entry.count} cases</span>

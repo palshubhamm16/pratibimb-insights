@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
 export default function UploadPage() {
@@ -6,6 +7,8 @@ export default function UploadPage() {
     const [uploading, setUploading] = useState(false);
     const [message, setMessage] = useState("");
     const [csvData, setCsvData] = useState([]);
+
+    const navigate = useNavigate();
 
     const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
     const api = axios.create({
@@ -52,6 +55,12 @@ export default function UploadPage() {
 
             setMessage("Upload successful ✅");
             console.log("Server Response:", response.data);
+
+            // ⬅️ Navigate to home page after 1 second
+            setTimeout(() => {
+                navigate("/");
+            }, 2000);
+
         } catch (error) {
             console.error("Upload failed:", error);
             setMessage("Upload failed ❌");
@@ -61,7 +70,7 @@ export default function UploadPage() {
     };
 
     return (
-        <div className="p-6 bg-green-200/20 min-h-screen flex flex-col items-center">
+        <div className="p-6 bg-blue-200/30 min-h-screen flex flex-col items-center">
             <div className="flex items-center justify-center mb-4 mx-auto">
                 <h1 className="text-3xl md:text-4xl lg:text-5xl tracking-tight font-extrabold mb-6">
                     Upload Fraud Report CSV
