@@ -7,17 +7,17 @@ export default function SummaryCards({ data }) {
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6 mx-[70px]">
-      <div className="bg-white rounded-2xl shadow p-6">
-        <p className="text-gray-500 text-sm">Total Reports</p>
-        <h2 className="text-2xl font-bold text-red-600">{totalReports.toLocaleString()}</h2>
+      <div className="shadow rounded-lg p-6 ring-2 ring-red-500 bg-red-100/50">
+        <h3 className="text-black text-sm font-semibold">Total Reports</h3>
+        <p className="text-2xl font-bold text-red-600">{totalReports.toLocaleString()}</p>
       </div>
-      <div className="bg-white rounded-2xl shadow p-6">
-        <p className="text-gray-500 text-sm">Total Amount</p>
-        <h2 className="text-2xl font-bold text-green-600">₹{totalAmount.toLocaleString()}</h2>
+      <div className="shadow rounded-lg p-6 ring-2 ring-green-500 bg-green-100/50">
+        <h3 className="text-black text-sm font-semibold">Total Amount</h3>
+        <p className="text-2xl font-bold text-green-600">₹{totalAmount.toLocaleString()}</p>
       </div>
-      <div className="bg-white rounded-2xl shadow p-6">
-        <p className="text-gray-500 text-sm">This Month</p>
-        <h2 className="text-2xl font-bold text-blue-600">{thisMonthReports.toLocaleString()}</h2>
+      <div className="shadow rounded-lg p-6 ring-2 ring-blue-500 bg-blue-100/30">
+        <h3 className="text-black text-sm font-semibold">This Month</h3>
+        <p className="text-2xl font-bold text-blue-600">{thisMonthReports.toLocaleString()}</p>
       </div>
     </div>
   );
