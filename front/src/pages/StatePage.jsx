@@ -146,16 +146,17 @@ export default function StatePage() {
                 <FraudCategoryPieChart data={categoryData} />
             </div>
 
-            {/* Other Charts */}
+            {/* Overall Grid: Fraud Days/Date Heatmap & Top Suspects/Scammer Check */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-10">
-                <TopFraudDays data={topDays} />
-                <TopSuspectNumbers data={topSuspects} />
-            </div>
-
-            {/* Misc */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-10">
-                <DateHeatmap data={heatmapData} />
-                <ScammerCheck />
+                {/* Left: Fraud Days & Date Heatmap (vertical) */}
+                <div className="flex flex-col gap-4 bg-blue-400/70 rounded-xl shadow p-4">
+                    <TopFraudDays data={topDays} />
+                    <DateHeatmap data={heatmapData} />
+                </div>
+                <div className="flex flex-col gap-4 bg-orange-400/70 rounded-xl shadow p-4">
+                    <TopSuspectNumbers data={topSuspects} />
+                    <ScammerCheck />
+                </div>
             </div>
 
             <div>

@@ -31,7 +31,7 @@ export default function VictimHeatmap({ data = [] }) {
       : "rgba(156, 163, 175, 0.45)";
 
   return (
-    <div className="bg-white p-4 rounded-2xl shadow mb-6 relative">
+    <div className="bg-white p-4 rounded-2xl shadow mb-6 relative mx-[80px]">
       <div className="mb-4 text-center">
         <h2 className="text-2xl font-semibold mb-4">
           State-wise Victim Heatmap

@@ -31,7 +31,7 @@ export default function AckLookup() {
     };
 
     return (
-        <div className="bg-white p-4 rounded-lg shadow mb-4">
+        <div className="bg-white p-4 rounded-lg shadow mb-4 ring-1 ring-green-600/80 bg-green-500/20">
             <h2 className="text-lg font-semibold mb-2">ACK Number Lookup:</h2>
             <div className="flex items-center gap-2">
                 <input
